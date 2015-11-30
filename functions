@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+app_hooks_source() {
+  TMPDIR=$(mktemp -d /tmp/APP_HOOKS.XXXXX)
+  trap "rm -rf $TMPDIR" EXIT
+
+  copy_from_image "dokku/$APP" /app/DOKKU_HOOKS $TMPDIR 2> /dev/null || true
+
+  [[ -f $TMPDIR/DOKKU_HOOKS ]] && source $TMPDIR/DOKKU_HOOKS \
+    || dokku_log_info1_quiet "Ignoring bad or missing DOKKU_HOOKS"
+}

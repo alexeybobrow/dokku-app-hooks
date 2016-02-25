@@ -11,3 +11,15 @@ app_hooks_source() {
   [[ -f $TMPDIR/DOKKU_HOOKS ]] && source $TMPDIR/DOKKU_HOOKS \
     || dokku_log_info1_quiet "Ignoring bad or missing DOKKU_HOOKS"
 }
+
+app_hooks_run_cmd() {
+  local APP="$1"; local IMAGE_TAG="$2"
+
+  local DOCKER_ARGS=$(: | plugn trigger docker-args-run $APP $IMAGE_TAG)
+  local IMAGE=$(get_app_image_name $APP $IMAGE_TAG)
+  local EXEC_CMD=""
+  [[ "$DOKKU_TRACE" ]] && DOCKER_ARGS+=" -e TRACE=true "
+  is_image_herokuish_based "$IMAGE" && EXEC_CMD="/exec"
+
+  echo "docker run $DOKKU_GLOBAL_RUN_ARGS --rm $DOCKER_ARGS $IMAGE $EXEC_CMD"
+}

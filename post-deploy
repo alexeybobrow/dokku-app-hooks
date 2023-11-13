@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$PLUGIN_AVAILABLE_PATH/app-hooks/functions"
+
+APP="$1"
+
+app_hooks_source
+
+if [[ `type -t app_hooks_post_deploy` == "function" ]]; then
+  dokku_log_info1 "Running app_hooks_post_deploy() hook from DOKKU_HOOKS"
+  app_hooks_post_deploy
+fi

@@ -3,10 +3,13 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
 
 app_hooks_source() {
-  local TMPDIR=$(mktemp -d /tmp/APP_HOOKS.XXXXX)
-  trap "rm -rf $TMPDIR" EXIT
+  local TMP_FILE=$(mktemp "/tmp/dokku-${DOKKU_PID}-${FUNCNAME[0]}.XXXXXX")
+  trap "rm -rf '$TMP_FILE' >/dev/null" RETURN INT TERM
 
-  copy_from_image "dokku/$APP" /app/DOKKU_HOOKS $TMPDIR 2> /dev/null || true
+  local IMAGE_TAG="$(get_running_image_tag "$APP")"
+  local IMAGE=$(get_deploying_app_image_name "$APP" "$IMAGE_TAG")
+
+  copy_from_image "$IMAGE" /app/DOKKU_HOOKS "$TMP_FILE" 2> /dev/null || true
 
   [[ -f $TMPDIR/DOKKU_HOOKS ]] && source $TMPDIR/DOKKU_HOOKS \
     || dokku_log_info1_quiet "Ignoring bad or missing DOKKU_HOOKS"

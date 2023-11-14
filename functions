@@ -11,8 +11,6 @@ app_hooks_source() {
 
   copy_from_image "$IMAGE" DOKKU_HOOKS "$TMP_FILE"/DOKKU_HOOKS 2> /dev/null || true
 
-  ls -lah $TMP_FILE
-
   [[ -f $TMP_FILE/DOKKU_HOOKS ]] && source $TMP_FILE/DOKKU_HOOKS \
     || dokku_log_info1_quiet "Ignoring bad or missing DOKKU_HOOKS"
 }
